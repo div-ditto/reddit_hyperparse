@@ -76,3 +76,29 @@ def test_arctic_pipeline():
     assert not any(path == "/search" for path, _ in client.calls)   # no global search
     assert all(q.get("sort") == "asc" for path, q in client.calls if "subreddit" in q)
     assert all(int(q["after"]) >= int(NOW - 14 * 3600) - 1 for _, q in client.calls if "after" in q)
+
+
+def test_discovered_subs_and_gates():
+    s = config.load(Path(__file__).resolve().parent.parent / "config.toml", lookback_hours=14)
+    s.raw["run"]["workers"] = 1
+    s.raw["subreddits"]["discovered"] = ["personalfinance", "IndiaFinance"]
+
+    def handler(path, q):
+        sub = q.get("subreddit")
+        if path == "/posts/search" and sub == "personalfinance":       # discovered, US sub
+            return 200, {"data": [p("d1", sub, "Is a high deductible plan worth it?"),   # jargon only
+                                  p("d2", sub, "Moving to India, is Niva Bupa good?")]}  # brand
+        if path == "/posts/search" and sub == "IndiaFinance":
+            return 200, {"data": [p("d3", sub, "Ditto helped me pick a plan")]}
+        if path == "/posts/search" and sub == "india":                  # regional
+            return 200, {"data": [p("r1", sub, "My 80C savings plan"),                # jargon only
+                                  p("r2", sub, "Is term insurance worth it?")]}       # umbrella
+        if path == "/posts/search" and sub == "HealthInsuranceIndia":   # insurance: any term
+            return 200, {"data": [p("i1", sub, "What is a deductible?")]}
+        return 200, {"data": []}
+
+    client = FakeArctic(handler)
+    ids = {r[0] for r in Scraper(s, client).run().rows}
+    assert ids == {"d2", "d3", "r2", "i1"}, ids
+    asked = {q.get("subreddit") for _, q in client.calls}
+    assert {"personalfinance", "IndiaFinance"} <= asked

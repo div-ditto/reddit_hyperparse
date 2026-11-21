@@ -26,17 +26,40 @@ exclude_subreddits = [
 ]
 
 [subreddits]
-# Read in full (every new post + every new comment), then matched locally.
+# Read in full (every new post + every new comment), matched on every keyword.
 insurance = [
   "indiahealthinsurance", "HealthInsuranceIndia", "InsuranceTroubleIndia",
   "InsuranceAdviceIndia", "MedicalInsuranceIndia", "personalfinanceindia",
   "InsuranceQueriesIndia", "InsuranceGuideIndia", "HealthInsuranceAMA",
   "InsuranceHelpIndia", "InsuranceGyaan", "IndianPersonalFinance", "TermInsuranceIndia",
 ]
-# Searched for the umbrella phrases only.
+# Posts here count if they say "health insurance" / "term insurance" or name a brand.
 regional = [
   "navimumbai", "mumbai", "bangalore", "india", "delhi", "Kerala",
   "TamilNadu", "bihar", "Maharashtra", "Goa", "karnataka",
+]
+
+# Where past matches came from, built from the sheet's history with
+#   python -m hyperparse.discover Reddit_Shadow_Protocol.xlsx   (re-run it now and then)
+# Posts here count only if they name a brand/plan (like the old all-of-Reddit
+# brand search); comments of those posts are read too.
+# 1760 past rows in 327 subreddits; tracked + these 68 cover 85%
+discovered = [
+  "IndiaInsuranceClaim", "IndiaFinance", "LegalAdviceIndia", "Faxioms", "IndianStockMarket",
+  "Insurance", "FinancialAdviceIndia", "IPO_India", "HDFCERGOCommunity", "SchengenVisa",
+  "UpdateINDIA", "hyderabad", "mutualfunds", "IndianStreetBets", "MutualfundsIndia",
+  "LifeInsurance", "Coconaad", "indianrealestate", "personalfinance", "BhartiyaStockMarket",
+  "IndiaSMEInsurance", "HealthInsurance", "ThirtiesIndia", "IndianInvestment",
+  "hyderabad_telugu", "AirTravelIndia", "SahiSarkariJobs", "IndiaDealsExchange",
+  "GovtJobAlertsIndia", "SarkariJobSelection", "IndiaTax", "IndianMarketUpdate",
+  "TrumpGlobalWar", "CharteredAccountants", "IndiaStocks", "nri", "IndianDevelopers",
+  "InternationalTravelIN", "IrishCitizenship", "ULIPTruth", "MumbaiJobsOpenings", "Kochi",
+  "Hyderabad_city", "kolkata", "AiDigital_Marketing", "UPSC_Forum", "Indians_StudyAbroad",
+  "InsuranceClaims", "IsThisAScamIndia", "Insurance_Companies", "CATpreparation", "IndianPets",
+  "IndianMutualFunds", "stock_trading_India", "TirumalaDarshan", "GetInsuredBeAssured",
+  "GurugramRentals", "wiseinvest", "Bhopal", "Moneyflow_India", "Askhyderabadpeople",
+  "hdfcbank", "IndiaLaw", "TwoXKeralam", "CyberLS", "GATEtard", "OTLK_Investors",
+  "ResultsCalendarIndia",
 ]
 
 [keywords]

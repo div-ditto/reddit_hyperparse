@@ -17,6 +17,10 @@ class Matcher:
         # Cheap pre-check: one big regex; only texts that hit it get the per-term scan.
         self._any = re.compile("|".join(rf"\b{re.escape(t)}\b" for t in self.keywords), re.I)
 
+        # Gates for posts outside the insurance subs (see Scraper._row).
+        self.brand_terms = {t.lower() for t in kw["global"]} | {"ditto"}
+        self.umbrella_terms = {t.lower() for t in kw["umbrella"]}
+
         f = cfg["filters"]
         self._motor = re.compile(r"\b(" + "|".join(map(re.escape, f["motor_exclude"])) + r")\b", re.I)
         self._motor_words = [m.lower() for m in f["motor_exclude"]]

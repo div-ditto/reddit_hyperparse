@@ -53,6 +53,9 @@ class Scraper:
         self.matcher = Matcher(self.cfg)
         self.scorer = Scorer(self.cfg)
         self.known = set(known_ids or ())
+        subs = self.cfg["subreddits"]
+        self.insurance = {s.lower() for s in subs["insurance"]}
+        self.regional = {s.lower() for s in subs["regional"]}
 
     def run(self) -> Result:
         t0 = time.time()
@@ -72,8 +75,12 @@ class Scraper:
                 "q": " OR ".join(map(_q, kw["umbrella"])),
                 "restrict_sr": "on", "sort": "new", "t": tf}),
         }
-        # Sources without an all-of-Reddit search (Arctic Shift) skip these.
-        glob = kw["global"] if getattr(self.client, "supports_global_search", True) else []
+        # Sources without an all-of-Reddit search (Arctic Shift) read the
+        # "discovered" subreddits instead - where past brand matches came from.
+        has_search = getattr(self.client, "supports_global_search", True)
+        if not has_search and subs.get("discovered"):
+            jobs["discovered posts"] = (subs["discovered"], "/new", {})
+        glob = kw["global"] if has_search else []
         for i in range(0, len(glob), 12):
             jobs[f"global search {i // 12 + 1}"] = (None, "/search", {
                 "q": "(" + " OR ".join(map(_q, glob[i:i + 12])) + ")",
@@ -172,6 +179,17 @@ class Scraper:
         matched = self.matcher.match(text)
         if not matched:
             return None
+        # Outside the insurance subs a post needs a brand/plan name (regional subs:
+        # or "health/term insurance"), as the old Reddit searches required.
+        # Otherwise words like "deductible" or "GMC" would flood the sheet.
+        sub_l = (it.subreddit or "").lower()
+        if is_post and sub_l not in self.insurance:
+            found = {m.lower() for m in matched}
+            ok = found & self.matcher.brand_terms
+            if sub_l in self.regional:
+                ok = ok or found & self.matcher.umbrella_terms
+            if not ok:
+                return None
         row_id = it.id if is_post else f"{it.post_id}_{it.id}"
         if row_id in self.known:
             return None

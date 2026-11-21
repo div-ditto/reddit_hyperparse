@@ -25,16 +25,32 @@ GitHub Actions (daily 09:00 IST)
 
 | Source | When | Notes |
 |---|---|---|
-| **Arctic Shift** (default) | no Reddit keys set | A free, open Reddit archive ([arctic-shift](https://github.com/ArthurHeitmann/arctic_shift)) that saves posts and comments the moment they're posted. No login, no key. A run takes about 2 minutes. |
+| **Arctic Shift** (default) | no Reddit keys set | A free, open Reddit archive ([arctic-shift](https://github.com/ArthurHeitmann/arctic_shift)) that saves posts and comments the moment they're posted. No login, no key. |
 | **Reddit API** | `REDDIT_CLIENT_ID` + `REDDIT_CLIENT_SECRET` set | Reddit's official API. It adds all-of-Reddit brand search and real scores. Needs an approved Reddit app. |
 
 Force one with the `SOURCE` variable: `arctic` or `reddit`. The default `auto` picks the API when keys exist.
 
-**What Arctic Shift covers:** every post and comment in the 13 insurance subreddits, every post
-in the 11 regional subreddits, and comments on matching posts. It has no search across all of
-Reddit, so brand mentions in subreddits not listed in `config.toml` are missed. To track more,
-add subreddits there. Score and comment count stay 0–1 in the archive for about 36 hours, so
-they are left blank.
+**What Arctic Shift covers:** Arctic Shift can't search all of Reddit by keyword; every
+search must name a subreddit. So the app reads three groups of subreddits from `config.toml`:
+
+| Group | Count | What counts as a match |
+|---|---|---|
+| `insurance` | 13 | every post and comment, on any keyword |
+| `regional` | 11 | posts that say "health insurance" / "term insurance" or name a brand, plus their comments |
+| `discovered` | 68 | posts that name a brand or plan, plus their comments |
+
+The `discovered` list holds the subreddits where your past matches came from, back when
+Reddit's own search still worked. Together the three groups cover **about 85% of the 1,760
+past rows** (Jun–Nov 2026). The rest were one-off hits spread over about 245 subreddits.
+Rebuild the list from newer sheet data now and then:
+
+```
+python -m hyperparse.discover path	o\your_sheet_export.xlsx
+```
+
+and paste its output over `discovered = [...]` in `config.toml`. A run reads about 3,000 posts
+and comments and takes about 4 minutes. Score and comment count stay 0–1 in the archive for
+about 36 hours, so they are left blank.
 
 Arctic Shift is a free volunteer service with no uptime guarantee, and it asks users to "be
 considerate". The app sends at most 2 requests at a time, about 1 a second, and backs off
