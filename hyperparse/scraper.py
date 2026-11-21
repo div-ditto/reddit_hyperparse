@@ -72,14 +72,15 @@ class Scraper:
                 "q": " OR ".join(map(_q, kw["umbrella"])),
                 "restrict_sr": "on", "sort": "new", "t": tf}),
         }
-        glob = kw["global"]
+        # Sources without an all-of-Reddit search (Arctic Shift) skip these.
+        glob = kw["global"] if getattr(self.client, "supports_global_search", True) else []
         for i in range(0, len(glob), 12):
             jobs[f"global search {i // 12 + 1}"] = (None, "/search", {
                 "q": "(" + " OR ".join(map(_q, glob[i:i + 12])) + ")",
                 "sort": "new", "t": tf, "type": "link"})
 
         items: dict[str, Item] = {}
-        workers = self.cfg["run"]["workers"]
+        workers = getattr(self.client, "max_workers", None) or self.cfg["run"]["workers"]
         with ThreadPoolExecutor(workers) as pool:
             futs = {pool.submit(self._collect, subs_, suffix, params, cutoff, pages): name
                     for name, (subs_, suffix, params) in jobs.items()}

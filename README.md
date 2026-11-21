@@ -21,24 +21,25 @@ GitHub Actions (daily 09:00 IST)
         └─ Excel         → output/reddit_<date>.xlsx + output/reddit_master.xlsx
 ```
 
-## How it reads Reddit (read this first)
+## Where the data comes from
 
-| Mode | When | Notes |
+| Source | When | Notes |
 |---|---|---|
-| **OAuth app** (recommended) | `REDDIT_CLIENT_ID` + `REDDIT_CLIENT_SECRET` set | No Reddit user login: the app signs in as itself. About 100 requests/min, full data (score, comment count). A full run takes 1–3 minutes. |
-| **Public feeds** | no keys | The same no-login `.json`/`.rss` feeds the Apps Script uses. Reddit now refuses these from many networks, including GitHub's servers and, as of Nov 2026, the network this was built on. In that case the run stops in seconds and says so. |
+| **Arctic Shift** (default) | no Reddit keys set | A free, open Reddit archive ([arctic-shift](https://github.com/ArthurHeitmann/arctic_shift)) that saves posts and comments the moment they're posted. No login, no key. A run takes about 2 minutes. |
+| **Reddit API** | `REDDIT_CLIENT_ID` + `REDDIT_CLIENT_SECRET` set | Reddit's official API. It adds all-of-Reddit brand search and real scores. Needs an approved Reddit app. |
 
-There is deliberately **no proxy or IP rotation**. Reddit's terms forbid getting around its
-blocks and rate limits, and doing so risks Reddit banning the account or the company. If
-the public feeds are refused, the fix is an API key.
+Force one with the `SOURCE` variable: `arctic` or `reddit`. The default `auto` picks the API when keys exist.
 
-**Getting a key.** Sign in at <https://www.reddit.com/prefs/apps> → *create another app* →
-type **script** → redirect URI `http://localhost:8080`. The string under the app name is the
-client ID; the *secret* is the client secret. Since 2025 Reddit's Responsible Builder Policy
-can require approval before new apps get API access. Ditto is a company, so tracking brand
-mentions counts as **commercial use**, which Reddit's Data API terms say needs Reddit's
-written approval. Follow the approval steps Reddit shows when you create the app, and settle
-commercial use with Reddit before relying on the data.
+**What Arctic Shift covers:** every post and comment in the 13 insurance subreddits, every post
+in the 11 regional subreddits, and comments on matching posts. It has no search across all of
+Reddit, so brand mentions in subreddits not listed in `config.toml` are missed. To track more,
+add subreddits there. Score and comment count stay 0–1 in the archive for about 36 hours, so
+they are left blank.
+
+Arctic Shift is a free volunteer service with no uptime guarantee, and it asks users to "be
+considerate". The app sends at most 2 requests at a time, about 1 a second, and backs off
+when the service is busy. Reddit's direct feeds refuse no-login reads, and its robots.txt
+disallows crawling, so this app never scrapes Reddit's site and uses no proxies or IP rotation.
 
 ## Setup
 
@@ -58,10 +59,11 @@ Repo → Settings → Secrets and variables → Actions → **New repository sec
 |---|---|
 | `SHEET_WEBAPP_URL` | the `/exec` URL |
 | `SHEET_KEY` | the security key |
-| `REDDIT_CLIENT_ID` | from reddit.com/prefs/apps |
-| `REDDIT_CLIENT_SECRET` | from reddit.com/prefs/apps |
+| `REDDIT_CLIENT_ID` | optional, only for the Reddit API source |
+| `REDDIT_CLIENT_SECRET` | optional, only for the Reddit API source |
 
-Optional **variables**: `LOOKBACK_HOURS` (default 14), `REDDIT_USER_AGENT`.
+Optional **variables**: `LOOKBACK_HOURS` (default 14), `SOURCE` (`auto` / `arctic` / `reddit`),
+`REDDIT_USER_AGENT`.
 
 Then Actions → *Daily Reddit scrape* → **Run workflow** to test. The run page shows a summary,
 and the Excel files are under **Artifacts**. Artifacts are kept for 90 days. They are not
@@ -96,13 +98,13 @@ Comment IDs are `<post>_<comment>`. Rows that mention Ditto are green.
 `priority_breakdown` is `F` freshness, `B` brand, `I` intent, `S` subreddit, `M` specificity.
 
 ## Exit codes
-`0` OK · `1` scraped, but the sheet push failed (Excel still written) · `2` Reddit could
-not be read.
+`0` OK · `1` scraped, but the sheet push failed (Excel still written) · `2` the data
+source could not be read.
 
 ## Development
 ```
 python -m pytest -q
 ```
-The tests run the whole pipeline against a fake Reddit API (paging, the 14-hour cutoff, the
+The tests run the whole pipeline against a fake Arctic Shift server, a fake Reddit API (paging, the 14-hour cutoff, the
 fallback when a combined subreddit read is refused, nested comments, filters, Excel) and a
 fake sheet.

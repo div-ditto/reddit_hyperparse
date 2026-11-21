@@ -41,6 +41,7 @@ jobs:
           REDDIT_USER_AGENT: ${{ vars.REDDIT_USER_AGENT || 'python:reddit_hyperparse:v1.0 (insurance mention monitor)' }}
           SHEET_WEBAPP_URL: ${{ secrets.SHEET_WEBAPP_URL }}
           SHEET_KEY: ${{ secrets.SHEET_KEY }}
+          SOURCE: ${{ vars.SOURCE || 'auto' }}
           LOOKBACK_HOURS: ${{ github.event.inputs.hours || vars.LOOKBACK_HOURS || '14' }}
         run: python -m hyperparse
 

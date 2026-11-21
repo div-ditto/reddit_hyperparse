@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 from . import config
+from .arctic_shift import ArcticShiftClient
 from .reddit_client import RedditBlocked, RedditClient
 from .scraper import Scraper
 from .sinks import SheetError, SheetSink, write_excel
@@ -30,8 +31,7 @@ def main(argv: list[str] | None = None) -> int:
     logging.getLogger("urllib3").setLevel(logging.WARNING)
 
     s = config.load(a.config, a.hours)
-    client = RedditClient(s.user_agent, s.reddit_client_id, s.reddit_client_secret,
-                          s["run"]["rpm_oauth"], s["run"]["rpm_public"])
+    client = make_client(s)
     log.info("mode=%s  window=last %.0fh", client.mode, s.lookback_hours)
     try:
         client.probe(s["subreddits"]["insurance"][0])
@@ -82,7 +82,7 @@ def main(argv: list[str] | None = None) -> int:
         log.info("excel: %s  (master: %s)", run_file, master)
         lines.append(f"- excel: `{run_file.name}`")
 
-    for f in res.failures:
+    for f in res.failures + getattr(client, "warnings", []):
         lines.append(f"- warning: {f}")
     _summary("\n".join(lines))
 
@@ -90,6 +90,18 @@ def main(argv: list[str] | None = None) -> int:
     if res.failures and res.scanned == 0:
         return 2
     return 1 if sheet_failed else 0
+
+
+def make_client(s: config.Settings):
+    """SOURCE=auto (default): Reddit API if keys are set, else Arctic Shift.
+    SOURCE=reddit | arctic forces one."""
+    src = (os.environ.get("SOURCE") or s["run"].get("source", "auto")).lower()
+    has_keys = bool(s.reddit_client_id and s.reddit_client_secret)
+    if src == "reddit" or (src == "auto" and has_keys):
+        return RedditClient(s.user_agent, s.reddit_client_id, s.reddit_client_secret,
+                            s["run"]["rpm_oauth"], s["run"]["rpm_public"])
+    return ArcticShiftClient(s.user_agent, s["run"].get("rpm_arctic", 60),
+                             s["run"].get("arctic_max_pages", 30))
 
 
 def _summary(md: str) -> None:
