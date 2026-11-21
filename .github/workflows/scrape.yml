@@ -1,0 +1,54 @@
+name: Daily Reddit scrape
+
+on:
+  schedule:
+    - cron: "30 3 * * *"        # every day 09:00 IST (03:30 UTC)
+  workflow_dispatch:
+    inputs:
+      hours:
+        description: "Look-back window in hours"
+        default: "14"
+
+concurrency:
+  group: reddit-scrape
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install
+        run: pip install -r requirements.txt pytest
+
+      - name: Tests
+        run: python -m pytest -q
+
+      - name: Scrape Reddit -> Google Sheet + Excel
+        env:
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USER_AGENT: ${{ vars.REDDIT_USER_AGENT || 'python:reddit_hyperparse:v1.0 (insurance mention monitor)' }}
+          SHEET_WEBAPP_URL: ${{ secrets.SHEET_WEBAPP_URL }}
+          SHEET_KEY: ${{ secrets.SHEET_KEY }}
+          LOOKBACK_HOURS: ${{ github.event.inputs.hours || vars.LOOKBACK_HOURS || '14' }}
+        run: python -m hyperparse
+
+      - name: Upload Excel
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reddit-excel-${{ github.run_number }}
+          path: output/*.xlsx
+          if-no-files-found: ignore
+          retention-days: 90

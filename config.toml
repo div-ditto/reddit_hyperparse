@@ -1,0 +1,147 @@
+# ================================================================
+#  reddit_hyperparse - settings
+#  Edit this file to change what is tracked. Same lists as the
+#  Apps Script CONFIG, so the sheet and this app agree.
+# ================================================================
+
+[run]
+lookback_hours = 14          # only posts/comments newer than this
+max_pages_per_listing = 10   # 100 items per page
+workers = 4                  # parallel requests (still rate-limited)
+# Requests per minute. OAuth allows ~100; public feeds need to stay low.
+rpm_oauth = 90
+rpm_public = 20
+output_dir = "output"
+
+[filters]
+motor_exclude = ["car", "cars", "vehicle", "motor", "bike"]
+exclude_subreddits = [
+  "AusFinance", "FIREUK", "remoteworking", "remotework", "germany",
+  "AskAGerman", "RemoteJobs", "GoingToSpain", "JobsPhilippines", "AusVisa",
+]
+
+[subreddits]
+# Read in full (every new post + every new comment), then matched locally.
+insurance = [
+  "indiahealthinsurance", "HealthInsuranceIndia", "InsuranceTroubleIndia",
+  "InsuranceAdviceIndia", "MedicalInsuranceIndia", "personalfinanceindia",
+  "InsuranceQueriesIndia", "InsuranceGuideIndia", "HealthInsuranceAMA",
+  "InsuranceHelpIndia", "InsuranceGyaan", "IndianPersonalFinance", "TermInsuranceIndia",
+]
+# Searched for the umbrella phrases only.
+regional = [
+  "navimumbai", "mumbai", "bangalore", "india", "delhi", "Kerala",
+  "TamilNadu", "bihar", "Maharashtra", "Goa", "karnataka",
+]
+
+[keywords]
+umbrella = ["health insurance", "term insurance"]
+
+# Searched across all of Reddit.
+global = [
+  "Star Health", "Star Health & Allied Insurance", "Niva Bupa", "Care Health Insurance",
+  "Aditya Birla Health Insurance", "ManipalCigna",
+  "HDFC ERGO", "ICICI Lombard", "Bajaj Allianz", "Bajaj General Insurance", "Tata AIG",
+  "SBI General", "Go Digit", "Cholamandalam MS", "Royal Sundaram", "IFFCO Tokio",
+  "Liberty General Insurance", "Magma HDI", "Generali Central", "Future Generali",
+  "Galaxy Health Insurance", "Raheja QBE", "IndusInd General Insurance", "Reliance General",
+  "Universal Sompo", "Zuno General Insurance", "Edelweiss General Insurance",
+  "Zurich Kotak General Insurance", "New India Assurance", "National Insurance Company",
+  "Oriental Insurance", "United India Insurance", "Acko General Insurance", "Acko Insurance",
+  "LIC of India", "LIC India", "Axis Max Life", "Max Life Insurance", "HDFC Life",
+  "ICICI Prudential Life", "SBI Life", "Bajaj Life Insurance", "Tata AIA Life",
+  "Kotak Mahindra Life", "Aditya Birla Sun Life", "PNB MetLife", "Canara HSBC Life",
+  "Ageas Federal Life", "Aviva Life", "Bandhan Life", "Edelweiss Life", "Zuno Life",
+  "Future Generali India Life", "IndiaFirst Life", "Pramerica Life", "Reliance Nippon Life",
+  "Sahara India Life", "Shriram Life", "Star Union Dai-ichi Life", "Acko Life Insurance",
+  "Go Digit Life Insurance", "Bharti AXA Life",
+  "Policybazaar", "Policy Bazaar", "InsuranceDekho", "Ditto Insurance", "PolicyX",
+  "Coverfox", "Turtlemint", "RenewBuy", "Beshak", "BimaKavach", "Onsurity",
+  "GoMedii", "Bajaj Markets", "Paytm Insurance", "Probus Insurance", "SecureNow",
+  "Pazcare", "Algates Insurance", "InsuranceSamadhan",
+  "Optima Restore", "Optima Secure", "my:health Suraksha", "my:health Koti Suraksha",
+  "Health Wallet HDFC", "Easy Health HDFC", "Arogya Sanjeevani",
+  "Family Health Optima", "Star Comprehensive Insurance Policy", "Senior Citizens Red Carpet",
+  "Young Star Insurance Policy", "Medi Classic Insurance Policy", "Diabetes Safe Insurance Policy",
+  "Star Health Assure", "Care Supreme", "Care Advantage", "Care Freedom",
+  "ReAssure 2.0", "ReAssure Niva Bupa", "Aspire Niva Bupa", "Health Companion Niva Bupa",
+  "Activ One MAX", "Activ Health Platinum", "ICICI Elevate", "Health AdvantEdge",
+  "Tata AIG MediCare Premier", "Tata AIG MediCare", "Bajaj My Health Care", "Bajaj Health Guard",
+  "SBI Arogya Premier", "SBI Arogya Supreme", "ManipalCigna ProHealth Protect",
+  "ManipalCigna ProHealth Plus", "Go Digit Health Care Plan", "Royal Sundaram Lifeline Supreme",
+  "National Mediclaim Policy", "New India Mediclaim Policy", "New India Premier Mediclaim",
+  "Oriental Happy Family Floater", "United India Individual Mediclaim",
+  "Smart Term Plan Plus", "Saral Jeevan Bima", "Click 2 Protect Supreme", "Click 2 Protect Super",
+  "iProtect Smart", "eTouch II", "Smart Protect Goal", "eShield Next", "Smart Shield Plus",
+  "LIC Tech Term", "Jeevan Amar", "Sampoorna Raksha Supreme", "Sampoorna Raksha Promise",
+  "Maha Raksha Supreme Select", "Kotak e-Term", "Mera Term Plan Plus", "iSelect Star Term Plan",
+  "Young Term Plan Canara HSBC", "DigiShield Plan", "Flexi Term Bharti AXA",
+  "Future Generali Care Plus",
+]
+
+# Jargon: matched inside the insurance subs.
+health_terms = [
+  "mediclaim", "cashless hospitalization", "network hospital", "claim settlement ratio",
+  "incurred claim ratio", "sum insured", "family floater", "top-up plan", "super top-up",
+  "no claim bonus",
+  "waiting period", "pre-existing disease", "co-payment", "room rent limit",
+  "restoration benefit", "day care procedure", "domiciliary hospitalization", "OPD cover",
+  "critical illness cover", "health insurance portability",
+  "free look period", "AYUSH treatment", "TPA", "pre-hospitalization", "post-hospitalization",
+  "deductible", "IRDAI", "GMC", "corporate health insurance", "group health insurance",
+  "maternity cover", "newborn cover", "bariatric surgery cover", "modern treatment cover",
+  "consumables cover", "wellness program", "preventive health checkup", "cashless everywhere",
+  "reimbursement claim", "solvency ratio",
+  "mediclaim rejection", "claim denied", "claim repudiated", "hospital cash policy",
+  "personal accident cover", "OPD insurance", "senior citizen health plan",
+  "parents health insurance", "individual health plan", "super top up vs top up",
+]
+term_terms = [
+  "sum assured", "death benefit", "return of premium", "ROP plan", "level term cover",
+  "increasing cover", "decreasing cover", "waiver of premium", "accidental death benefit",
+  "accidental disability rider",
+  "terminal illness benefit", "life cover", "pure term plan", "term plan tax benefit",
+  "80C", "80D", "riders", "premium payment term", "policy term", "life stage benefit",
+  "surrender value", "nominee", "underwriting", "medical test for insurance",
+  "smoker non-smoker premium", "group term insurance", "credit life insurance",
+  "mortgage protection plan", "income replacement plan", "child term plan",
+  "whole life term plan", "claim rejected term insurance", "term insurance for self employed",
+  "term insurance for NRI", "lapsed policy revival", "grace period", "exclusion clause",
+  "suicide clause", "term insurance vs ULIP", "term insurance vs endowment",
+  "saral jeevan bima", "married women's property act", "MWPA", "keyman insurance",
+]
+
+[priority]
+freshness_max = 30
+freshness_tau_hours = 18
+brand_ditto = 25
+brand_competitor_platform = 18
+brand_insurer_plan = 12
+brand_generic = 5
+competitor_platforms = [
+  "Policybazaar", "Policy Bazaar", "InsuranceDekho", "PolicyX", "Coverfox",
+  "Turtlemint", "RenewBuy", "Beshak", "BimaKavach", "Onsurity", "Bajaj Markets",
+  "Paytm Insurance", "Probus Insurance", "SecureNow", "Pazcare",
+  "Algates Insurance", "InsuranceSamadhan",
+]
+intent_max = 15
+intent_question = 4
+intent_comparison = 8
+intent_buying = 8
+intent_help = 4
+sub_high = 20
+sub_core = 12
+sub_niche = 8
+sub_default = 6
+sub_authority_high = ["personalfinanceindia", "IndianPersonalFinance"]
+sub_authority_core = [
+  "HealthInsuranceIndia", "InsuranceTroubleIndia", "InsuranceAdviceIndia",
+  "MedicalInsuranceIndia", "TermInsuranceIndia", "indiahealthinsurance",
+]
+sub_authority_niche = [
+  "InsuranceQueriesIndia", "InsuranceGuideIndia", "HealthInsuranceAMA",
+  "InsuranceHelpIndia", "InsuranceGyaan",
+]
+spec_1 = 4
+spec_2 = 7
+spec_3plus = 10
