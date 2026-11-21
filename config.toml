@@ -32,6 +32,7 @@ insurance = [
   "InsuranceAdviceIndia", "MedicalInsuranceIndia", "personalfinanceindia",
   "InsuranceQueriesIndia", "InsuranceGuideIndia", "HealthInsuranceAMA",
   "InsuranceHelpIndia", "InsuranceGyaan", "IndianPersonalFinance", "TermInsuranceIndia",
+  "InsuranceForAll", "InsuranceHelpline",   # added after the Oct 27-29 backtest
 ]
 # Posts here count if they say "health insurance" / "term insurance" or name a brand.
 regional = [

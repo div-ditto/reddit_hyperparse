@@ -35,6 +35,7 @@ class Result:
     scanned: int = 0
     failures: list[str] = field(default_factory=list)
     seconds: float = 0.0
+    seen_posts: set[str] = field(default_factory=set)   # every post id read (for backtests)
 
 
 def _q(term: str) -> str:
@@ -57,10 +58,14 @@ class Scraper:
         self.insurance = {s.lower() for s in subs["insurance"]}
         self.regional = {s.lower() for s in subs["regional"]}
 
-    def run(self) -> Result:
+    def run(self, start: float | None = None, end: float | None = None) -> Result:
+        """Last `lookback_hours`, or a fixed past window [start, end) (unix seconds)."""
         t0 = time.time()
         res = Result()
-        cutoff = t0 - self.s.lookback_hours * 3600
+        cutoff = start if start is not None else t0 - self.s.lookback_hours * 3600
+        end = end if end is not None else float("inf")
+        if end != float("inf") and hasattr(self.client, "until"):
+            self.client.until = end
         pages = self.cfg["run"]["max_pages_per_listing"]
         subs = self.cfg["subreddits"]
         kw = self.cfg["keywords"]
@@ -105,7 +110,9 @@ class Scraper:
                     res.failures.append(f"{name}: {exc!r}")
                     log.exception("%s failed", name)
 
+        items = {k: v for k, v in items.items() if v.created_utc < end}
         res.scanned = len(items)
+        res.seen_posts = {it.id for it in items.values() if it.kind == "t3"}
         now = time.time()
         rows: list[list] = []
         need_comments: list[Item] = []
@@ -126,7 +133,7 @@ class Scraper:
                     post = futs[f]
                     try:
                         for c in f.result():
-                            if c.created_utc < cutoff or ("t1" + c.id) in items:
+                            if not cutoff <= c.created_utc < end or ("t1" + c.id) in items:
                                 continue
                             items["t1" + c.id] = c
                             c.post_id = c.post_id or post.id

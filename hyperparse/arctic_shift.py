@@ -42,6 +42,7 @@ class ArcticShiftClient:
         self.timeout = timeout
         self.stats = {"requests": 0, "errors": 0}
         self.warnings: list[str] = []
+        self.until: float | None = None      # set for a past window (backtest)
 
     # ------------------------------------------------------------ http
     def _get(self, path: str, params: dict) -> list[dict]:
@@ -118,7 +119,10 @@ class ArcticShiftClient:
         seen: set[str] = set()
         convert = _comment if endpoint.startswith("/comments") else _post
         for _ in range(self.max_pages):
-            rows = self._get(endpoint, {"subreddit": sub, "after": after, "sort": "asc", "limit": 100})
+            params = {"subreddit": sub, "after": after, "sort": "asc", "limit": 100}
+            if self.until:
+                params["before"] = int(self.until)
+            rows = self._get(endpoint, params)
             for d in rows:
                 if d.get("id") in seen:
                     continue

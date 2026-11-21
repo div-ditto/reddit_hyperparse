@@ -35,7 +35,7 @@ search must name a subreddit. So the app reads three groups of subreddits from `
 
 | Group | Count | What counts as a match |
 |---|---|---|
-| `insurance` | 13 | every post and comment, on any keyword |
+| `insurance` | 15 | every post and comment, on any keyword |
 | `regional` | 11 | posts that say "health insurance" / "term insurance" or name a brand, plus their comments |
 | `discovered` | 68 | posts that name a brand or plan, plus their comments |
 
@@ -100,6 +100,26 @@ python -m hyperparse --hours 24 --no-sheet
 ```
 To run it daily on Windows, use Task Scheduler → Create Basic Task → Daily → Program
 `python`, arguments `-m hyperparse`, start in the `reddit_hyperparse` folder.
+
+## How well it matches the old setup (backtest)
+
+27–29 Oct 2026: the old Reddit-search setup saved 70 posts, and this app was run over the
+same three days through the archive.
+
+| | Posts |
+|---|---|
+| Found by both | **62 of 70 (89%)**: insurance subs 55/55, regional 1/1, discovered 6/6 |
+| Missed by the app | 8, all in subreddits not on the list. 4 were noise or vehicle posts the old search picked up ("nominee" in a US politics post, "riders", car and bike insurance). 2 were insurance subs that are now added (`InsuranceForAll`, `InsuranceHelpline`). |
+| Found only by the app | **35** more posts, almost all real questions in the insurance subs (claims, porting, renewals) that Reddit's search had missed, plus 150 matching comments the old setup never saved |
+
+Re-run it for any dates your sheet covers:
+
+```
+python -m hyperparse.backtest Reddit_Shadow_Protocol.xlsx --from 2026-10-27 --to 2026-10-29
+```
+
+The report is saved to `output/backtest_<from>_<to>.xlsx` (tabs: Missed by app, Found by both,
+Only the app, App comments).
 
 ## Changing what is tracked
 Edit `config.toml`. It holds the subreddits, keywords, excluded subs, motor words, scoring
