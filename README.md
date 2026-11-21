@@ -1,6 +1,6 @@
 # reddit_hyperparse
 
-Every day, finds Reddit posts and comments from the **last 14 hours** that mention Indian
+Every day, finds Reddit posts and comments from the **last 24 hours** that mention Indian
 health/term insurance brands, plans or jargon. It scores them by priority and then:
 
 - pushes new rows into the Google Sheet's **New Cases** tab (through the Apps Script web app), and
@@ -78,17 +78,16 @@ Repo → Settings → Secrets and variables → Actions → **New repository sec
 | `REDDIT_CLIENT_ID` | optional, only for the Reddit API source |
 | `REDDIT_CLIENT_SECRET` | optional, only for the Reddit API source |
 
-Optional **variables**: `LOOKBACK_HOURS` (default 14), `SOURCE` (`auto` / `arctic` / `reddit`),
+Optional **variables**: `LOOKBACK_HOURS` (default 24), `SOURCE` (`auto` / `arctic` / `reddit`),
 `REDDIT_USER_AGENT`.
 
 Then Actions → *Daily Reddit scrape* → **Run workflow** to test. The run page shows a summary,
 and the Excel files are under **Artifacts**. Artifacts are kept for 90 days. They are not
 committed, because this repo is public and the rows contain Reddit usernames.
 
-> **14 hours vs. once a day.** A daily run looking back 14 hours misses the other 10 hours
-> of the day. To cover every hour, either set `LOOKBACK_HOURS` to `24`, or add a second
-> schedule line `- cron: "30 15 * * *"` (21:00 IST). Rows already in the sheet are never
-> added twice.
+> **Full-day coverage.** The run at 09:00 IST looks back 24 hours, so each day picks up
+> exactly where the previous one stopped. If GitHub starts a run late, the small overlap is
+> harmless: rows already in the sheet are never added twice.
 
 ### 3. Run on your own PC (optional)
 ```powershell
@@ -121,6 +120,6 @@ source could not be read.
 ```
 python -m pytest -q
 ```
-The tests run the whole pipeline against a fake Arctic Shift server, a fake Reddit API (paging, the 14-hour cutoff, the
+The tests run the whole pipeline against a fake Arctic Shift server, a fake Reddit API (paging, the time cutoff, the
 fallback when a combined subreddit read is refused, nested comments, filters, Excel) and a
 fake sheet.

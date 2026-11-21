@@ -2,7 +2,7 @@
 
 https://github.com/ArthurHeitmann/arctic_shift  - API base below.
 Posts and comments are archived the moment they are posted, so the last
-14 hours are available. Limits: searches are per subreddit (no search across
+24 hours are available. Limits: searches are per subreddit (no search across
 all of Reddit), and score / num_comments stay 0-1 for ~36 hours, so they
 are left blank here.
 

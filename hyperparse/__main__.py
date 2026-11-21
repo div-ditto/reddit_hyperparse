@@ -1,4 +1,4 @@
-"""python -m hyperparse  [--hours 14] [--no-sheet] [--no-excel] [--dry-run]"""
+"""python -m hyperparse  [--hours 24] [--no-sheet] [--no-excel] [--dry-run]"""
 from __future__ import annotations
 
 import argparse

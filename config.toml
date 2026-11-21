@@ -8,7 +8,7 @@
 # auto = Reddit API if REDDIT_CLIENT_ID/SECRET are set, else Arctic Shift
 # (free open Reddit archive, no login). Or force: "reddit" | "arctic".
 source = "auto"
-lookback_hours = 14          # only posts/comments newer than this
+lookback_hours = 24          # only posts/comments newer than this (daily run = full day)
 max_pages_per_listing = 10   # 100 items per page
 workers = 4                  # parallel requests (still rate-limited)
 # Requests per minute. OAuth allows ~100; public feeds need to stay low.

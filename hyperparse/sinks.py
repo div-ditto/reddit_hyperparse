@@ -82,7 +82,12 @@ def write_excel(rows: list[list], out_dir: Path) -> tuple[Path, Path]:
     seen = {str(r[0]) for r in existing}
     merged = existing + [r for r in rows if str(r[0]) not in seen]
     merged.sort(key=lambda r: str(r[1] or ""), reverse=True)
-    _save(merged, master, "All")
+    try:
+        _save(merged, master, "All")
+    except PermissionError:
+        # Open in Excel on Windows: keep this run's file, update the master next time.
+        log.warning("%s is open in another program; master not updated this run "
+                    "(this run's rows are in %s)", master.name, run_path.name)
     return run_path, master
 
 

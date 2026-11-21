@@ -7,7 +7,7 @@ on:
     inputs:
       hours:
         description: "Look-back window in hours"
-        default: "14"
+        default: "24"
 
 concurrency:
   group: reddit-scrape
@@ -42,7 +42,7 @@ jobs:
           SHEET_WEBAPP_URL: ${{ secrets.SHEET_WEBAPP_URL }}
           SHEET_KEY: ${{ secrets.SHEET_KEY }}
           SOURCE: ${{ vars.SOURCE || 'auto' }}
-          LOOKBACK_HOURS: ${{ github.event.inputs.hours || vars.LOOKBACK_HOURS || '14' }}
+          LOOKBACK_HOURS: ${{ github.event.inputs.hours || vars.LOOKBACK_HOURS || '24' }}
         run: python -m hyperparse
 
       - name: Upload Excel
